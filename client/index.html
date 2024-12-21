@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        section {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            margin: auto;
+            width: 80vw;
+            height: 80vh;
+
+            #zonaJuego {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                border: 1px solid black;
+
+                #tablero {
+                    margin: auto;
+                    width: 600px;
+                    height: 600px;
+                    /* border: 1px solid green; */
+
+                    div {
+                        height: 60px;
+                        width: 100%;
+
+                        div {
+                            width: 60px;
+                            height: 60px;
+                            border: 1px solid red;
+                        }
+                    }
+                }
+
+                #barcos {
+                    border: 1px solid black;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 10px;
+                    margin-bottom: 20px;
+
+                    .ship {
+                        cursor: grab;
+                        background-color: #87ceeb;
+                        border: 1px solid #000;
+                        padding: 5px;
+                        text-align: center;
+                    }
+                }
+
+            }
+
+            #chat {
+                width: 20%;
+                height: 100%;
+                border: 1px solid black;
+            }
+        }
+    </style>
+    <script type="module">
+        window.onload = () => {
+            cargarTablero()
+            setDragBarcos()
+            setDragEnterCelda()
+        }
+
+        function cargarTablero() {
+            const tablero = document.getElementById('tablero')
+            const filas = 10
+            const columnas = 10
+            const ancho = 600 / columnas
+            const alto = 600 / filas
+
+            for (let i = 0; i < filas; i++) {
+                const fila = document.createElement('div')
+                fila.style.display = 'flex'
+
+
+                for (let j = 0; j < columnas; j++) {
+                    const celda = document.createElement('div')
+                    celda.classList.add('celda')
+                    celda.dataset.numCelda = i + '-' + j
+                    fila.appendChild(celda)
+                }
+
+                tablero.appendChild(fila)
+            }
+        }
+
+
+        //SETEAMOS EL DRAG AND DROP DE LOS BARCOS
+        function setDragBarcos() {
+            const barcos = document.querySelectorAll('.ship')
+            barcos.forEach(barco => {
+                barco.addEventListener('dragstart', drag)
+            })
+        }
+        function setDragEnterCelda() {
+            const celdas = document.querySelectorAll('.celda')
+            celdas.forEach(celda => {
+                celda.addEventListener('dragenter', dragenter)
+                celda.addEventListener('dragleave', dragleave)
+            })
+        }
+
+        // REALIZAR EL DRAG AND DROP
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        // SE ALMACENA EL TAMAÑO DEL BARCO QUE SE ESTÁ ARRASTRANDO
+        function drag(ev) {
+            const barcoTamano = this.dataset.size;
+            ev.dataTransfer.setData("barcoId", this.dataset.size);
+            ev.dataTransfer.setData("barcoTamano", barcoTamano);
+        }
+
+        // AL PASAR EL BARCO POR LA CELDA SE VERIFICA SI SE PUEDE COLOCAR
+        function dragenter(ev) {
+            ev.preventDefault();
+            const tamanoBarco = ev.dataTransfer.getData("barcoTamano");
+            console.log(ev.dataTransfer.getData("barcoTamano"));
+            console.log('dragenter - celda', this.dataset.numCelda)
+            if (!this.classList.contains('ocupado')) {
+                resaltarCeldasValidas(ev, this, tamanoBarco); // Pasamos el evento junto con la celda
+            }
+        }
+
+        // AL SACAR EL BARCO DE LA CELDA CAMBIE DE COLOR
+        function dragleave(ev) {
+            ev.preventDefault();
+            this.style.backgroundColor = 'white';
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+        }
+
+        // FUNCION PARA RESALTAR LAS CELDAS VÁLIDAS
+        function resaltarCeldasValidas(event, celda, tamanoBarco) {
+            celda.style.backgroundColor = 'green';
+            let a = event.dataTransfer.getData("barcoTamano");;
+            let numCelda = celda.dataset.numCelda;
+
+            console.log('tamanoBarco', tamanoBarco)
+            console.log('numCelda', numCelda)
+        }
+
+    </script>
+</head>
+
+<body>
+    <section>
+        <div id="zonaJuego">
+            <div id="tablero"></div>
+            <div id="barcos">
+                <div class="ship" draggable="true" data-size="4">🚢🚢🚢🚢</div>
+                <div class="ship" draggable="true" data-size="3">🚢🚢🚢</div>
+                <div class="ship" draggable="true" data-size="3">🚢🚢🚢</div>
+                <div class="ship" draggable="true" data-size="2">🚢🚢</div>
+                <div class="ship" draggable="true" data-size="1">🚢</div>
+            </div>
+        </div>
+        <div id="chat"></div>
+    </section>
+</body>
+
+</html>
